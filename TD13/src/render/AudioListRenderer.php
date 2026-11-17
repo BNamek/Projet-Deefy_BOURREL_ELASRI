@@ -25,9 +25,10 @@ class AudioListRenderer implements Render {
     }
 
     private function compacte(AudioTrack $piste): string {
-        $res = "<br>" . $piste->titre . " - " . $piste->auteur .
-        " <br> <audio controls src=" . $piste->nomFichierAudio . "> </audio>";
+        $titre = filter_var($piste->titre, FILTER_SANITIZE_SPECIAL_CHARS);
+        $auteur = filter_var($piste->auteur, FILTER_SANITIZE_SPECIAL_CHARS);
+        $src = filter_var($piste->nomFichierAudio, FILTER_SANITIZE_SPECIAL_CHARS);
 
-        return $res;
+        return '<br>' . $titre . ' - ' . $auteur . '<br><audio controls src="' . $src . '"></audio>';
     }
 }
