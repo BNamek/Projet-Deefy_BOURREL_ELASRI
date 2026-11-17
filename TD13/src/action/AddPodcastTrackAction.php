@@ -5,6 +5,7 @@ use iutnc\deefy\audio\tracks\AudioTrack;
 use iutnc\deefy\audio\lists\Playlist;
 use iutnc\deefy\audio\tracks\PodcastTrack;
 use iutnc\deefy\render\AudioListRenderer;
+use iutnc\deefy\repository\DeefyRepository;
 
 class AddPodcastTrackAction extends Action{
     public function execute():string{
@@ -45,7 +46,11 @@ class AddPodcastTrackAction extends Action{
                     $nom = bin2hex(random_bytes(8)) . '.mp3';
                     //On sort le fichier de tmp name qui est un rangement temporaires pour le mettre dans audio
                     //Le DIR donne le dossier du fichier php ou on se situe et on rajoute /audio pour le ranger dans un dossier audio
-                    move_uploaded_file($_FILES['userfile']['tmp_name'], __DIR__ . '../../audio/' . $nom);
+                    $destination = __DIR__ . '/../../audio/' . $nom;
+
+                    if (!move_uploaded_file($_FILES['userfile']['tmp_name'], $destination)) {
+                        return 'Impossible d’enregistrer le fichier MP3.';
+                    }
 
                     //On met donc le nouveau nom du fichier dans le chemin avec audio qui l'endroit ou on la stocker
                     $aud = new PodcastTrack($var1,'audio/'.$nom);
@@ -54,6 +59,10 @@ class AddPodcastTrackAction extends Action{
                     $aud -> __set('duree',$var4);
 
                     $audioL = $_SESSION['Playlist'];
+
+                    $repository = DeefyRepository::getInstance();
+                    $repository->ajoutPiste($audioL->id, $aud, $nom);
+
                     $audioL -> ajouterPiste($aud);
                     $_SESSION['Playlist']=$audioL;
                     $af = new AudioListRenderer($_SESSION['Playlist']);

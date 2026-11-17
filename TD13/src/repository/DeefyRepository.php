@@ -87,4 +87,27 @@ class DeefyRepository{
             return $play;
         }
 
+        public function ajoutPiste(int $playlistId, PodcastTrack $piste, string $nomFichier): void{
+            $sql = 'insert into track (titre, auteur_podcast, genre, duree, filename, type) values (:titre, :auteur, :genre, :duree, :fichier, :type)';
+
+            $requete = $this->pdo->prepare($sql);
+            $requete->execute(['titre' => $piste->titre, 'auteur' => $piste->auteur, 'genre' => $piste->genre, 'duree' => $piste->duree, 'fichier' => $nomFichier, 'type' => 'P',]);
+
+            $pisteId = (int) $this->pdo->lastInsertId();
+
+            // Calcule la prochaine position dans la playlist.
+            $sql = 'select max(no_piste_dans_liste) as derniere_position from playlist2track where id_pl = :playlist';
+
+            $requete = $this->pdo->prepare($sql);
+            $requete->execute(['playlist' => $playlistId]);
+            $ligne = $requete->fetch(PDO::FETCH_ASSOC);
+            $position = (int) ($ligne['derniere_position'] ?? 0) + 1;
+
+            // Rattacher la piste à la playlist.
+            $sql = 'insert into playlist2track (id_pl, id_track, no_piste_dans_liste) values (:playlist, :piste, :position)';
+
+            $requete = $this->pdo->prepare($sql);
+            $requete->execute(['playlist' => $playlistId, 'piste' => $pisteId, 'position' => $position,]);
+        }
+
 }
