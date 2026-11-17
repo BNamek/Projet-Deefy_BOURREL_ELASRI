@@ -12,7 +12,7 @@ class AudioListRenderer implements Render {
     }
 
     public function render(int $selector): string {
-        $res = "<h2>" . $this->liste->nom . "</h2>";
+        $res = '<h2>' . htmlspecialchars($this->liste->nom) . '</h2>';
 
         foreach ($this->liste->piste as $piste) {
             $res = $res . $this->compacte($piste);

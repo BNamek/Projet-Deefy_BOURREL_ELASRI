@@ -110,4 +110,13 @@ class DeefyRepository{
             $requete->execute(['playlist' => $playlistId, 'piste' => $pisteId, 'position' => $position,]);
         }
 
+        public function sauvegarderPlaylist(Playlist $playlist): void{
+            $sql = 'insert into playlist (nom) values (:nom)';
+
+            $requete = $this->pdo->prepare($sql);
+            $requete->execute(['nom' => $playlist->nom]);
+
+            $playlist->setId((int) $this->pdo->lastInsertId());
+        }
+
 }

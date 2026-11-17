@@ -4,6 +4,7 @@ namespace iutnc\deefy\action;
 use iutnc\deefy\audio\lists\AudioList;
 use iutnc\deefy\audio\lists\Playlist;
 use iutnc\deefy\render\AudioListRenderer;
+use iutnc\deefy\repository\DeefyRepository;
 
 class AddPlaylistAction extends Action{
 
@@ -23,15 +24,22 @@ class AddPlaylistAction extends Action{
             //On le retourne pour que l'utilisateur puisse le remplir
             return $res;
             }else{
-                //On crée le tableau qui va etre vide car ici on veux juste crée une playlist mais ne pas mettre de musique dedans
-                $audio = array();
-                //On la stock dans une session
-                //Dans le post on met le nom pour recuprer la valeur qui est dans le titre et on le filtre pour mettre les caracteres speciaux entre guillemet
-                $var = filter_var($_POST['titre'],FILTER_SANITIZE_SPECIAL_CHARS);
-                $_SESSION['Playlist'] = new Playlist($var,$audio);
-                $af = new AudioListRenderer($_SESSION['Playlist']);
-                return $af ->render(1).'<br>
-                <a href="?action=add-track">Ajouter une piste</a>';
+                $titre = $_POST['titre'] ?? '';
+
+                if ($titre === '') {
+                    return 'Saisis un nom pour la playlist.';
+                }
+
+                $playlist = new Playlist($titre, []);
+
+                $repository = DeefyRepository::getInstance();
+                $repository->sauvegarderPlaylist($playlist);
+
+                $_SESSION['Playlist'] = $playlist;
+
+                $rendu = new AudioListRenderer($playlist);
+
+                return $rendu->render(1) . '<p><a href="?action=add-track">Ajouter une piste</a></p>';
             }
     }
 }
